@@ -1,6 +1,8 @@
 # wxWidgets-3.2.2.1-Webview-Edge
 CodeBlocks wxWidgets-3.2.2.1-Webview-Edge
 
+Compiler MingwDistrox64_GCC 9.2.0_Boost 1.71.0
+
 In wxWidgets-3.2.2.1\include\wx\msw\setup.h
 change to 1
 #define wxUSE_WEBVIEW_EDGE 1

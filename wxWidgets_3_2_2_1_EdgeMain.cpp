@@ -203,8 +203,15 @@ for(auto v : opti_arr)
     maxCnt ++;
     rowCnt ++;
 }
-// Not Working as expected yet
-tableBodys.Add(tableBody);
+// Not Working as expected yet 
+ // Fix
+
+if(tableBody != ""){
+    tableBodys.Add(tableBody);
+       paginators += "<button onclick='pageClick(this)'> Page:" + wxString::FromDouble(pageCnt++) + "</button>";
+}
+    
+//tableBodys.Add(tableBody);
 
  strylestr += "\n<style>\n";
 

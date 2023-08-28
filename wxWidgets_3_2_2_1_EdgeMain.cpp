@@ -104,7 +104,7 @@ wxWidgets_3_2_2_1_EdgeFrame::wxWidgets_3_2_2_1_EdgeFrame(wxWindow *parent, wxWin
     htmlp += "<title>INI</title>";
     htmlp += "<body>";
 
-    htmlp += " <textarea style='width:99%;' id='qTXT' name='qTXT' rows='4' cols='50'>SELECT top 1001 SN, COMP_R, QUAN_R, LOCAT, ENTRY_DATE FROM MEZANIN;</textarea>";
+    htmlp += " <textarea style='width:99%;' id='qTXT' name='qTXT' rows='4' cols='50'>SELECT  SN, COMP_R, QUAN_R, LOCAT, ENTRY_DATE FROM MEZANIN;</textarea>";
 
     htmlp += "<br><button onclick='clicked();'>Exec</button>";
     htmlp += "<script>";
@@ -144,60 +144,16 @@ void wxWidgets_3_2_2_1_EdgeFrame::OnQuit(wxCommandEvent &event)
 }
 
 wxArrayString tableBodys;
-wxString paginators;
-wxString strylestr;
+wxArrayString paginator_all;
+
+wxString stylesheet_str;
 std::string tableHead;
+int currentPage = 0;
 
-void RefreshFromSQL(wxString qTXT)
+
+wxString stylesht_bulid()
 {
-
-    tableBodys.Clear();
-    paginators = "";
-    strylestr = "";
-    tableHead = "<tr>";
-
-    std::vector<std::vector<std::string>> opti_arr = SQL_SERV_VEXT_V2(qTXT.ToStdString(), CONN_STR, true);
-
-    std::string tableBody = "";
-
-    int rowCnt = 0;
-    int maxCnt = 0;
-    int maxRows = 1000;
-    int pageCnt = 0;
-
-    for (auto c : opti_arr[0])
-        tableHead += "<th>" + c + "</th>";
-
-    tableHead += "</tr>\n";
-
-    for (auto v : opti_arr)
-    {
-        tableBody += "<tr>";
-
-        if (rowCnt > 0)
-            for (auto c : v)
-                tableBody += "<td>" + c + "</td>";
-
-        tableBody += "</tr>\n";
-
-        if (maxCnt == maxRows)
-        {
-            tableBodys.Add(tableBody);
-            paginators += "<button onclick='pageClick(this)'> Page:" + wxString::FromDouble(pageCnt) + "</button>";
-            pageCnt++;
-            tableBody = "";
-            maxCnt = 0;
-        }
-        maxCnt++;
-        rowCnt++;
-    }
-
-    if (tableBody != "")
-    {
-        tableBodys.Add(tableBody);
-        paginators += "<button onclick='pageClick(this)'> Page:" + wxString::FromDouble(pageCnt++) + "</button>";
-    }
-
+    wxString strylestr = "";
     strylestr += "\n<style>\n";
 
     strylestr += " thead {\n  ";
@@ -253,12 +209,102 @@ void RefreshFromSQL(wxString qTXT)
 
     strylestr += "\n</style>\n";
 
+    return strylestr;
+}
+
+
+wxString paginatorHTML(int CurrentpageNUmber , wxArrayString  PGaLL )
+{
+    wxString paginators = "";
+    int pgCnt = 0;
+    int gaper = 8;
+
+    for(auto page : PGaLL)
+    {
+
+         if ( (pgCnt >= CurrentpageNUmber - gaper  && pgCnt <= CurrentpageNUmber + gaper)
+         || pgCnt == 0 || pgCnt == PGaLL.size()-1)
+         {
+             if (pgCnt == CurrentpageNUmber)
+                page.Replace("white;","yellow;");
+
+                paginators += page;
+
+         }
+             if (pgCnt == 0 ) paginators +=   "<button> ... </button>";
+             if(pgCnt == PGaLL.size()-2) paginators +=   "<button> ... </button>";
+
+         pgCnt ++;
+    }
+    return paginators;
+}
+
+
+void RefreshFromSQL(wxString qTXT)
+{
+    currentPage = 0;
+    tableBodys.Clear();
+    paginator_all.Clear();
+    stylesheet_str = stylesht_bulid();
+    tableHead = "<tr>";
+
+    std::vector<std::vector<std::string>> opti_arr = SQL_SERV_VEXT_V2(qTXT.ToStdString(), CONN_STR, true);
+
+    std::string tableBody = "";
+
+    int rowCnt = 0;
+    int maxCnt = 0;
+    int maxRows = 1000;
+
+
+    for (auto c : opti_arr[0])
+        tableHead += "<th>" + c + "</th>";
+
+    tableHead += "</tr>\n";
+
+    for (auto v : opti_arr)
+    {
+        tableBody += "<tr>";
+
+        if (rowCnt > 0)
+            for (auto c : v)
+                tableBody += "<td>" + c + "</td>";
+
+        tableBody += "</tr>\n";
+
+        if (maxCnt == maxRows)
+        {
+            tableBodys.Add(tableBody);
+            tableBody = "";
+            maxCnt = 0;
+        }
+        maxCnt++;
+        rowCnt++;
+    }
+
+    if (tableBody != "")
+    {
+        tableBodys.Add(tableBody);
+
+    }
+
+    // Generate Paginator
+
+    int pageCnt = 0 ;
+    for(auto tb:tableBodys)
+    {
+        paginator_all.Add("<button style='background-color: white;' onclick='pageClick(this)'> Page:" + wxString::FromDouble(pageCnt) + "</button>");
+        pageCnt++;
+    }
+
+
+
     wxString htmlp = "";
     htmlp += "<!DOCTYPE html>";
     htmlp += "<html>";
     htmlp += "<title>INI</title>";
     htmlp += "\n<head>";
-    htmlp += strylestr;
+    htmlp += stylesheet_str;
     htmlp += "</head>\n";
     htmlp += "<body>\n";
 
@@ -285,7 +331,8 @@ void RefreshFromSQL(wxString qTXT)
 
     htmlp += "</div>\n";
 
-    htmlp += "<div class='pagination'>\n" + paginators + "</div>";
+
+    htmlp += "<div class='pagination'>\n" + paginatorHTML(0,paginator_all) + "</div>";
     htmlp += "</body>\n";
     htmlp += "</html>";
 
@@ -298,7 +345,6 @@ void pageClick(wxString PageNum)
     wxString pgNum = PageNum.AfterFirst(':').BeforeFirst('?');
     wxString qTxt = PageNum.AfterFirst('?');
 
-    PageNum.Replace("Page:", "");
 
     if (tableBodys.size() == 0)
         return;
@@ -308,7 +354,7 @@ void pageClick(wxString PageNum)
     htmlp += "<html>";
     htmlp += "<title>INI</title>";
     htmlp += "\n<head>";
-    htmlp += strylestr;
+    htmlp += stylesheet_str;
     htmlp += "</head>\n";
     htmlp += "<body>\n";
 
@@ -330,12 +376,12 @@ void pageClick(wxString PageNum)
     htmlp += "\n<div id='table-parent'>";
     htmlp += "\n<table>\n";
     htmlp += "\n  <thead id='tthead'>\n" + tableHead + "</thead>\n";
-    htmlp += "\n  <tbody id='ttbody'>" + tableBodys[wxAtoi(PageNum)] + "</tbody>\n";
+    htmlp += "\n  <tbody id='ttbody'>" + tableBodys[wxAtoi(pgNum)] + "</tbody>\n";
 
     htmlp += "\n</table>\n";
     htmlp += "</div>\n";
 
-    htmlp += "<div class='pagination'>\n" + paginators + "</div>";
+    htmlp += "<div class='pagination'>\n" +  paginatorHTML(wxAtoi(pgNum),paginator_all) + "</div>";
 
     htmlp += "</body>\n";
     htmlp += "</html>";

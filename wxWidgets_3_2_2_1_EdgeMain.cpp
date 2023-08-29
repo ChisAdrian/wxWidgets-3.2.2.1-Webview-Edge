@@ -47,9 +47,6 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 }
 
 //(*IdInit(wxWidgets_3_2_2_1_EdgeFrame)
-const long wxWidgets_3_2_2_1_EdgeFrame::idMenuQuit = wxNewId();
-const long wxWidgets_3_2_2_1_EdgeFrame::idMenuAbout = wxNewId();
-const long wxWidgets_3_2_2_1_EdgeFrame::ID_STATUSBAR1 = wxNewId();
 //*)
 
 BEGIN_EVENT_TABLE(wxWidgets_3_2_2_1_EdgeFrame, wxFrame)
@@ -70,32 +67,7 @@ wxWebView *webView;
 wxWidgets_3_2_2_1_EdgeFrame::wxWidgets_3_2_2_1_EdgeFrame(wxWindow *parent, wxWindowID id)
 {
     //(*Initialize(wxWidgets_3_2_2_1_EdgeFrame)
-    wxMenu *Menu1;
-    wxMenu *Menu2;
-    wxMenuBar *MenuBar1;
-    wxMenuItem *MenuItem1;
-    wxMenuItem *MenuItem2;
-
     Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
-    MenuBar1 = new wxMenuBar();
-    Menu1 = new wxMenu();
-    MenuItem1 = new wxMenuItem(Menu1, idMenuQuit, _("Quit\tAlt-F4"), _("Quit the application"), wxITEM_NORMAL);
-    Menu1->Append(MenuItem1);
-    MenuBar1->Append(Menu1, _("&File"));
-    Menu2 = new wxMenu();
-    MenuItem2 = new wxMenuItem(Menu2, idMenuAbout, _("About\tF1"), _("Show info about this application"), wxITEM_NORMAL);
-    Menu2->Append(MenuItem2);
-    MenuBar1->Append(Menu2, _("Help"));
-    SetMenuBar(MenuBar1);
-    StatusBar1 = new wxStatusBar(this, ID_STATUSBAR1, 0, _T("ID_STATUSBAR1"));
-    int __wxStatusBarWidths_1[1] = {-1};
-    int __wxStatusBarStyles_1[1] = {wxSB_NORMAL};
-    StatusBar1->SetFieldsCount(1, __wxStatusBarWidths_1);
-    StatusBar1->SetStatusStyles(1, __wxStatusBarStyles_1);
-    SetStatusBar(StatusBar1);
-
-    Connect(idMenuQuit, wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&wxWidgets_3_2_2_1_EdgeFrame::OnQuit);
-    Connect(idMenuAbout, wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&wxWidgets_3_2_2_1_EdgeFrame::OnAbout);
     //*)
 
     wxString htmlp = "";
@@ -117,16 +89,13 @@ wxWidgets_3_2_2_1_EdgeFrame::wxWidgets_3_2_2_1_EdgeFrame(wxWindow *parent, wxWin
     htmlp += "</body>";
     htmlp += "</html>";
 
-    FILE *fp;
 
-    fp = fopen("htmlp.html", "w+");
-
-    fputs(htmlp.c_str(), fp);
-    fclose(fp);
 
     // wxMessageBox(wxString::FromDouble(  wxWebView::IsBackendAvailable(wxWebViewBackendEdge)));
 
     webView = wxWebView::New(this, ID_WEBW); //, "about:blank", wxDefaultPosition, wxDefaultSize, wxWebViewBackendEdge);
+    webView->EnableHistory(false);
+
     webView->SetPage(htmlp, "");
 
     Connect(ID_WEBW, wxEVT_WEBVIEW_TITLE_CHANGED, (wxObjectEventFunction)&wxWidgets_3_2_2_1_EdgeFrame::OnwxWebView);
@@ -146,72 +115,10 @@ void wxWidgets_3_2_2_1_EdgeFrame::OnQuit(wxCommandEvent &event)
 wxArrayString tableBodys;
 wxArrayString paginator_all;
 
-wxString stylesheet_str;
+std::string stylesheet_str;
 std::string tableHead;
 int currentPage = 0;
-
-
-wxString stylesht_bulid()
-{
-    wxString strylestr = "";
-    strylestr += "\n<style>\n";
-
-    strylestr += " thead {\n  ";
-    strylestr += "    background: white;\n  ";
-    strylestr += "   position: sticky;\n  ";
-    strylestr += "   top: 0;";
-    strylestr += "   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);\n  ";
-    strylestr += " }\n  ";
-
-    strylestr += "#table-parent \n  ";
-    strylestr += "{ \n  ";
-    strylestr += "  height:75vh; \n  ";
-    strylestr += "  overflow:scroll; \n  ";
-    strylestr += "   border-radius :10px; \n  ";
-    strylestr += "    border: 1px solid grey; \n  ";
-    strylestr += "    width:99%; \n  ";
-    strylestr += "} \n  ";
-    strylestr += " \n  ";
-    strylestr += "table{ \n  ";
-    strylestr += " width : 100%; \n  ";
-    strylestr += " overflow:scroll; \n  ";
-    strylestr += "} \n  ";
-    strylestr += " \n  ";
-    strylestr += " \n  ";
-    strylestr += "table, td { \n  ";
-    strylestr += "  border: 1px solid black; \n  ";
-    strylestr += "  border-collapse: collapse; \n  ";
-    strylestr += "  word-wrap:break-word; \n  ";
-    strylestr += "} \n  ";
-    strylestr += " \n  ";
-    strylestr += "th{ \n  ";
-    strylestr += "  background-color:white; \n  ";
-    strylestr += "  color:black; \n  ";
-    strylestr += "  font-weight:bold; \n  ";
-    strylestr += "  border: 1px solid black; \n  ";
-    strylestr += "  border-collapse: collapse; \n  ";
-    strylestr += "} \n  ";
-
-
-    strylestr += "textarea { \n  ";
-    strylestr += "  background-color:white; \n  ";
-    strylestr += "  width:99%; \n  ";
-
-    strylestr += "} \n  ";
-
-    strylestr += " .pagination { ";
-    strylestr += "  display: inline-block; } ";
-
-    strylestr += " .pagination button { ";
-    strylestr += "  color: black;";
-    strylestr += "  float: left;";
-    strylestr += "  text-decoration: none; }";
-
-    strylestr += "\n</style>\n";
-
-    return strylestr;
-}
-
+#include "stylesheet.h"
 
 wxString paginatorHTML(int CurrentpageNUmber , wxArrayString  PGaLL )
 {
@@ -223,16 +130,18 @@ wxString paginatorHTML(int CurrentpageNUmber , wxArrayString  PGaLL )
     {
 
          if ( (pgCnt >= CurrentpageNUmber - gaper  && pgCnt <= CurrentpageNUmber + gaper)
-         || pgCnt == 0 || pgCnt == PGaLL.size()-1)
+                                            || pgCnt == 0 || pgCnt == (int)PGaLL.size()-1)
          {
-             if (pgCnt == CurrentpageNUmber)
-                page.Replace("white;","yellow;");
+            if (pgCnt == CurrentpageNUmber)
+            {
+                page.Replace("<button","<button style='background-color:grey;color: white;border-radius: 5px;' ");
+            }
 
-                paginators += page;
+            paginators += page;
 
          }
-             if (pgCnt == 0 ) paginators +=   "<button> ... </button>";
-             if(pgCnt == PGaLL.size()-2) paginators +=   "<button> ... </button>";
+             if (pgCnt+1 == CurrentpageNUmber - gaper ) paginators +=   "<button> ... </button>";
+             if(pgCnt == CurrentpageNUmber + gaper ) paginators +=   "<button> ... </button>";
 
          pgCnt ++;
     }
@@ -245,7 +154,7 @@ void RefreshFromSQL(wxString qTXT)
     currentPage = 0;
     tableBodys.Clear();
     paginator_all.Clear();
-    stylesheet_str = stylesht_bulid();
+    stylesheet_str = styleSheet_build();
     tableHead = "<tr>";
 
     std::vector<std::vector<std::string>> opti_arr = SQL_SERV_VEXT_V2(qTXT.ToStdString(), CONN_STR, true);
@@ -293,7 +202,7 @@ void RefreshFromSQL(wxString qTXT)
     int pageCnt = 0 ;
     for(auto tb:tableBodys)
     {
-        paginator_all.Add("<button style='background-color: white;' onclick='pageClick(this)'> Page:" + wxString::FromDouble(pageCnt) + "</button>");
+        paginator_all.Add("<button onclick='pageClick(this)'> Page:" + wxString::FromDouble(pageCnt) + "</button>");
         pageCnt++;
     }
 
@@ -341,13 +250,12 @@ void RefreshFromSQL(wxString qTXT)
 
 void pageClick(wxString PageNum)
 {
-
     wxString pgNum = PageNum.AfterFirst(':').BeforeFirst('?');
     wxString qTxt = PageNum.AfterFirst('?');
 
-
     if (tableBodys.size() == 0)
         return;
+
 
     wxString htmlp = "";
     htmlp += "<!DOCTYPE html>";
@@ -387,7 +295,19 @@ void pageClick(wxString PageNum)
     htmlp += "</html>";
 
     webView->SetPage(htmlp, "");
+
+    /*
+    // pageClick
+    FILE *fp;
+
+    fp = fopen("htmlp.html", "w+");
+
+    fputs(htmlp.c_str(), fp);
+    fclose(fp);
+*/
 }
+
+// Events from HTML -JS - C++
 
 void wxWidgets_3_2_2_1_EdgeFrame::OnwxWebView(wxWebViewEvent &event)
 {
@@ -399,12 +319,4 @@ void wxWidgets_3_2_2_1_EdgeFrame::OnwxWebView(wxWebViewEvent &event)
         pageClick(str);
 }
 
-void wxWidgets_3_2_2_1_EdgeFrame::OnAbout(wxCommandEvent &event)
-{
-    wxString msg = wxbuildinfo(long_f);
-    wxMessageBox(msg, _("Welcome to..."));
-}
 
-void wxWidgets_3_2_2_1_EdgeFrame::OnButton1Click(wxCommandEvent &event)
-{
-}

@@ -60,7 +60,7 @@ END_EVENT_TABLE()
 #include <wx/webview.h>
 #include "mssql.h"
 
-std::string CONN_STR = "DRIVER={SQL Server};Server=gia1-sql-gia1ppl1;Network Library=DBMSSOCN;Database=ALEX_EXT;OLE DB Services=-2;Uid=LogUser;Port=1433;Pwd=Log4VISvlsGIA2020#;";
+std::string CONN_STR = "DRIVER={SQL Server};Server=?;Network Library=DBMSSOCN;Database=?;OLE DB Services=-2;Uid=?;Port=1433;Pwd=?;";
 
 wxWebView *webView;
 
